@@ -44,6 +44,19 @@ const apiLimiter = rateLimit({
 
 app.use('/api/', apiLimiter)
 
+// Service landing endpoint for deployment checks and browser visits
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    service: 'scamshield-api',
+    message: 'ScamShield API is running.',
+    endpoints: {
+      health: '/api/health',
+      analyze: 'POST /api/analyze',
+    },
+  })
+})
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({

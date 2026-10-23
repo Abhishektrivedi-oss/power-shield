@@ -198,8 +198,13 @@ export async function analyzeMessageWithGemini(message) {
   }
 
   const ai = new GoogleGenAI({ apiKey: apiKey.trim() })
-  const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
-  const modelsToTry = [preferredModel, 'gemini-2.0-flash', 'gemini-1.5-flash']
+  const preferredModel = process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash'
+  const modelsToTry = [
+    preferredModel,
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-2.0-flash-001',
+  ].filter((model, index, models) => models.indexOf(model) === index)
 
   let outputText = null
   let lastError = null
