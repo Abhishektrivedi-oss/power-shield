@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+// Defaults to same-origin `/api/*`, served by Netlify Functions in production and `netlify dev` locally
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 /**
  * Checks backend server health.
@@ -44,7 +45,7 @@ export async function analyzeMessageApi(message) {
       body: JSON.stringify({ message }),
     })
   } catch (networkError) {
-    const error = new Error('Could not connect to the ScamShield backend server. Please make sure the server is running on port 5000.')
+    const error = new Error('Could not connect to the ScamShield analysis service. Please check your connection and try again.')
     error.cause = networkError
     throw error
   }
