@@ -9,17 +9,35 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 5000
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173'
+const normalizeOrigin = (value) => value.trim().replace(/\/+$/, '').toLowerCase()
 
-// Restrict CORS to configured frontend origin
+// FRONTEND_ORIGIN accepts one origin or a comma-separated list, e.g.
+// "https://your-site.netlify.app,https://www.your-domain.com"
+const FRONTEND_ORIGINS = (process.env.FRONTEND_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map(normalizeOrigin)
+  .filter(Boolean)
+
+const ALLOWED_ORIGINS = new Set([
+  ...FRONTEND_ORIGINS,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+])
+
+// Render (and most PaaS hosts) sit behind a single proxy; required for accurate per-IP rate limiting.
+app.set('trust proxy', 1)
+
+// Restrict CORS to configured frontend origins
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, curl, or same-origin)
-      if (!origin || origin === FRONTEND_ORIGIN || origin === 'http://127.0.0.1:5173') {
+      if (!origin || ALLOWED_ORIGINS.has(normalizeOrigin(origin))) {
         callback(null, true)
       } else {
-        callback(new Error(`Origin ${origin} not allowed by CORS.`))
+        // Respond without CORS headers instead of throwing, so disallowed origins get a clean browser-side block
+        console.warn(`[ScamShield AI] Blocked CORS request from origin: ${origin}`)
+        callback(null, false)
       }
     },
     methods: ['GET', 'POST', 'OPTIONS'],
@@ -83,7 +101,7 @@ app.use(errorHandler)
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`[ScamShield AI] Backend server running on http://localhost:${PORT}`)
-    console.log(`[ScamShield AI] CORS allowed origin: ${FRONTEND_ORIGIN}`)
+    console.log(`[ScamShield AI] CORS allowed origins: ${[...ALLOWED_ORIGINS].join(', ')}`)
   })
 }
 

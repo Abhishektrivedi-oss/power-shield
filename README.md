@@ -90,7 +90,12 @@ Copy `client/.env.example` to `client/.env`:
 VITE_API_BASE_URL=http://localhost:5000
 ```
 
-- `VITE_API_BASE_URL`: Base URL pointing to the Express backend API.
+- `VITE_API_BASE_URL`: Base URL pointing to the Express backend API (no trailing slash, no `/api` suffix). The `http://localhost:5000` fallback applies only to `npm run dev`; production builds must set it.
+
+### Production (Netlify frontend + Render backend)
+
+- **Netlify** (Site configuration → Environment variables): `VITE_API_BASE_URL=https://<your-render-service>.onrender.com`. Vite inlines this at build time, so trigger a new deploy after setting it. Never put `GEMINI_API_KEY` in Netlify.
+- **Render** (Environment): `GEMINI_API_KEY=...` and `FRONTEND_ORIGIN=https://<your-site>.netlify.app` (comma-separate multiple origins, no trailing slash).
 
 ---
 
