@@ -1,5 +1,6 @@
-// Defaults to same-origin `/api/*`, served by Netlify Functions in production and `netlify dev` locally
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+// Always same-origin `/api/*`, served by Netlify Functions in production and `netlify dev` locally.
+// An external base URL (e.g. the old Render server) fails CORS from the Netlify domain.
+const API_BASE_URL = ''
 
 /**
  * Checks backend server health.
